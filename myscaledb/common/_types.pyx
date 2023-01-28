@@ -10,7 +10,7 @@ from cpython.mem cimport PyMem_Malloc, PyMem_Free
 from libc.stdint cimport (int8_t, int16_t, int32_t, int64_t,
                           uint8_t, uint16_t, uint32_t, uint64_t)
 
-from aiochclient.exceptions import ChClientError
+from myscaledb.common.exceptions import ClientError
 
 
 cdef datetime _datetime_parse(str string):
@@ -45,6 +45,7 @@ DEF ARR_CLS = ']'
 
 RE_TUPLE = re.compile(r"^Tuple\((.*)\)$")
 RE_ARRAY = re.compile(r"^Array\((.*)\)$")
+RE_FixedARRAY = re.compile(r"^FixedArray\((.*)\)$")
 RE_NULLABLE = re.compile(r"^Nullable\((.*)\)$")
 RE_LOW_CARDINALITY = re.compile(r"^LowCardinality\((.*)\)$")
 
@@ -448,9 +449,10 @@ cdef class ArrayType:
     def __cinit__(self, str name, bint container):
         self.name = name
         self.container = container
-        self.type = what_py_type(
-            RE_ARRAY.findall(name)[0], container=True
-        )
+        if len(RE_ARRAY.findall(name)) != 0:
+            self.type = what_py_type(RE_ARRAY.findall(name)[0], container=True)
+        else:
+            self.type = what_py_type(RE_FixedARRAY.findall(name)[0].split(',')[0], container=True)
 
     cdef list _convert(self, str string):
         return [self.type.p_type(val) for val in seq_parser(string[1:-1])]
@@ -623,6 +625,7 @@ cdef dict CH_TYPES_MAPPING = {
     "DateTime64": DateTime64Type,
     "Tuple": TupleType,
     "Array": ArrayType,
+    "FixedArray": ArrayType,
     "Nullable": NullableType,
     "Nothing": NothingType,
     "UUID": UUIDType,
@@ -646,7 +649,7 @@ cdef what_py_type(str name, bint container = False):
             ch_type = name.split("(")[0]
         return CH_TYPES_MAPPING[ch_type](name, container=container)
     except KeyError:
-        raise ChClientError(f"Unrecognized type name: '{name}'")
+        raise ClientError(f"Unrecognized type name: '{name}'")
 
 
 cpdef what_py_converter(str name, bint container = False):
@@ -736,7 +739,7 @@ cpdef bytes py2ch(value):
     try:
         return PY_TYPES_MAPPING[type(value)](value)
     except KeyError:
-        raise ChClientError(
+        raise ClientError(
             f"Unrecognized type: '{type(value)}'. "
             f"The value type should be exactly one of "
             f"int, float, str, dt.date, dt.datetime, tuple, list, uuid.UUID (or None). "

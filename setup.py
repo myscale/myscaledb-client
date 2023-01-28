@@ -12,10 +12,12 @@ except ImportError:
 
 ext = '.pyx' if USE_CYTHON else '.c'
 
-extensions = [Extension("aiochclient._types", ["aiochclient/_types" + ext])]
+extensions = [Extension("myscaledb.common._types", ["myscaledb/common/_types" + ext])]
 
 if USE_CYTHON:
     extensions = cythonize(extensions, compiler_directives={'language_level': 3})
+
+print("USE_CYTHON {} \next {} \nextensions {}".format(USE_CYTHON, ext, extensions))
 
 
 class BuildFailed(Exception):
@@ -47,21 +49,26 @@ def read(fname):
 
 
 setup_opts = dict(
-    name='aiochclient',
-    version='2.2.0',
-    description='Async http clickhouse client for python 3.6+',
+    name='myscaledb',
+    version='2.0.0',
+    description='Async and sync http clickhouse client for python 3.6+',
     long_description=read('README.md'),
     long_description_content_type="text/markdown",
-    author='Danilchenko Maksim',
-    author_email='dmax.dev@gmail.com',
+    author='MochiXu',
+    author_email='mochix@moqi.ai',
     packages=find_packages(exclude=('test*',)),
-    package_dir={'aiochclient': 'aiochclient'},
+    package_dir={'myscaledb': 'myscaledb'},
     include_package_data=True,
-    install_requires=['sqlparse>=0.3.0'],
+    install_requires=[
+        'sqlparse>=0.3.0',
+        'aiodns>=3.0.0',
+        'aiohttp>=3.0.1',
+    ],
+
     license='MIT',
     url='https://github.com/maximdanilchenko/aiochclient',
     zip_safe=False,
-    keywords='clickhouse async python aiohttp',
+    keywords='clickhouse async sync python aiohttp',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
