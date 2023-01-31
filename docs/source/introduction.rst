@@ -3,18 +3,19 @@
 Introduction
 ============
 
-`myscaledb-client` is an async/sync http(s) ClickHouse client for python 3.6+ supporting
+`myscaledb-client` is an async/sync http(s) MyScale client for python 3.6+ supporting
 type conversion in both directions, streaming, lazy decoding on select queries,
 and a fully typed interface.
 
-MyScale is a vector database built on the top of ClickHouse. To support vector
-data, we added a new data type called `FixedArray`.  We forked and modified
-`aiochclient`_ to support the new data type, and also provide synchronous client
-for ClickHouse.
+MyScale is a vector database built on the top of ClickHouse. We forked and
+modified `aiochclient`_ to support vector related queries, and also add a
+synchronous client. Since MyScale is compatible with ClickHouse,
+`myscaledb-client` can be also used as a ClickHouse client.
 
 .. _aiochclient: https://github.com/maximdanilchenko/aiochclient/
 
-Use `myscaledb-client` for a simple interface into your ClickHouse deployment.
+Use `myscaledb-client` for a simple interface into your MyScale/ClickHouse
+deployment.
 
 Requirements
 ------------

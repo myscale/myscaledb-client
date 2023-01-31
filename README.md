@@ -1,14 +1,11 @@
-# aiochclient
+# MyScale Database Client
 
-[![PyPI version](https://badge.fury.io/py/aiochclient.svg)](https://badge.fury.io/py/aiochclient)
-[![Travis CI](https://app.travis-ci.com/maximdanilchenko/aiochclient.svg?branch=master)](https://app.travis-ci.com/maximdanilchenko/aiochclient)
-[![Documentation Status](https://readthedocs.org/projects/aiochclient/badge/?version=latest)](https://aiochclient.readthedocs.io/en/latest/?badge=latest)
-[![codecov](https://codecov.io/gh/maximdanilchenko/aiochclient/branch/master/graph/badge.svg)](https://codecov.io/gh/maximdanilchenko/aiochclient)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+[![PyPI version](https://badge.fury.io/py/myscaledb-client.svg)](https://badge.fury.io/py/myscaledb-client)
+[![Documentation Status](https://readthedocs.org/projects/myscaledb-client/badge/?version=latest)](https://myscaledb-client.readthedocs.io/en/latest/?badge=latest)
 
-An async http(s) ClickHouse client for python 3.6+ supporting type
-conversion in both directions, streaming, lazy decoding on select queries, and a
-fully typed interface.
+`myscaledb-client` is an async/sync http(s) MyScale client for python 3.6+ supporting
+type conversion in both directions, streaming, lazy decoding on select queries,
+and a fully typed interface.
 
 ## Table of Contents
 
@@ -20,26 +17,32 @@ fully typed interface.
 - [Notes on Speed](#notes-on-speed)
 
 ## Installation
-You can use it with either 
-[aiohttp](https://github.com/aio-libs/aiohttp) or 
+
+You can use it with either
+[aiohttp](https://github.com/aio-libs/aiohttp) or
 [httpx](https://github.com/encode/httpx) http connectors.
 
 To use with `aiohttp` install it with command:
-```
+
+```bash
 > pip install aiochclient[aiohttp]
 ```
+
 Or `aiochclient[aiohttp-speedups]` to install with extra speedups.
 
 To use with `httpx` install it with command:
-```
+
+```bash
 > pip install aiochclient[httpx]
 ```
+
 Or `aiochclient[httpx-speedups]` to install with extra speedups.
 
 Installing with `[*-speedups]` adds the following:
+
 - [cChardet](https://pypi.python.org/pypi/cchardet) for `aiohttp` speedup
 - [aiodns](https://pypi.python.org/pypi/aiodns) for `aiohttp` speedup
-- [ciso8601](https://github.com/closeio/ciso8601) for ultra-fast datetime 
+- [ciso8601](https://github.com/closeio/ciso8601) for ultra-fast datetime
   parsing while decoding data from ClickHouse for `aiohttp` and `httpx`.
 
 Additionally the installation process attempts to use Cython for a speed boost
@@ -73,6 +76,7 @@ await client.execute(
 
 For INSERT queries you can pass values as `*args`. Values should be
 iterables:
+
 ```python
 await client.execute(
     "INSERT INTO t VALUES",
@@ -109,6 +113,7 @@ assert val == (dt.date(2018, 9, 8), 3.14)
 
 With async iteration on the query results stream you can fetch multiple
 rows without loading them all into memory at once:
+
 ```python
 async for row in client.iterate(
     "SELECT number, number*2 FROM system.numbers LIMIT 10000"
@@ -124,6 +129,7 @@ any of last for INSERT and all another queries.
 All fetch queries return rows as lightweight, memory efficient objects. _Before
 v`1.0.0` rows were only returned as tuples._ All rows have a full mapping interface, where you can
 get fields by names or indexes:
+
 ```python
 row = await client.fetchrow("SELECT a, b FROM t WHERE a=1")
 
@@ -136,12 +142,12 @@ assert list(row.values()) == [1, (dt.date(2018, 9, 8), 3.14)]
 
 ## Documentation
 
-To check out the [api docs](https://aiochclient.readthedocs.io/en/latest/api.html), 
-visit the [readthedocs site.](https://aiochclient.readthedocs.io/en/latest/).
+To check out the [api docs](https://myscaledb-client.readthedocs.io/en/latest/reference.html),
+visit the [readthedocs site.](https://myscaledb-client.readthedocs.io/en/latest/).
 
 ## Type Conversion
 
-`aiochclient` automatically converts types from ClickHouse to python types and
+`myscaledb-client` automatically converts types from ClickHouse to python types and
 vice-versa.
 
 | ClickHouse type | Python type |
@@ -178,15 +184,16 @@ vice-versa.
 
 ## Connection Pool Settings
 
-`aiochclient` uses the
+`myscaledb-client` uses the
 [aiohttp.TCPConnector](https://docs.aiohttp.org/en/stable/client_advanced.html#limiting-connection-pool-size)
 to determine pool size.  By default, the pool limit is 100 open connections.
 
 ## Notes on Speed
 
-It's highly recommended using `uvloop` and installing `aiochclient` with
+It's highly recommended using `uvloop` and installing `myscaledb-client` with
 speedups for the sake of speed. Some recent benchmarks on our
 machines without parallelization:
+
 - 180k-220k rows/sec on SELECT
 - 50k-80k rows/sec on INSERT
 

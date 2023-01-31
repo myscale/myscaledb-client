@@ -49,9 +49,9 @@ def read(fname):
 
 
 setup_opts = dict(
-    name='myscaledb',
-    version='2.0.0',
-    description='Async and sync http clickhouse client for python 3.6+',
+    name='myscaledb-client',
+    version='2.0.1',
+    description='Async and sync http MyScale client for python 3.6+',
     long_description=read('README.md'),
     long_description_content_type="text/markdown",
     author='MochiXu',
@@ -63,10 +63,11 @@ setup_opts = dict(
         'sqlparse>=0.3.0',
         'aiodns>=3.0.0',
         'aiohttp>=3.0.1',
+        'nest_asyncio~=1.5.6',
     ],
 
     license='MIT',
-    url='https://github.com/maximdanilchenko/aiochclient',
+    url='https://github.com/myscale/myscaledb-client',
     zip_safe=False,
     keywords='clickhouse async sync python aiohttp',
     classifiers=[
