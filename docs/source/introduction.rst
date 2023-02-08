@@ -27,15 +27,44 @@ It requires Python >= 3.6 due to the use of types.
 Installation
 ------------
 
-You can install `myscaledb-client` with `pip` or your favourite package manager:
+You can install `myscaledb-client` with `pip` or your favourite package manager, We recommend you to install it with command:
 
 ::
 
     $ pip install myscaledb-client
 
 
-Add the ``-U`` switch to update to the latest version if `myscaledb-client` is already
-installed.
+Add the ``-U`` switch to update to the latest version if `myscaledb-client` is already installed.
+
+To use with `aiohttp` install it with command:
+
+::
+
+    $ pip install 'myscaledb-client[aiohttp]'
+
+
+Or `myscaledb-client[aiohttp-speedups]` to install with extra speedups.
+
+To use with `httpx` install it with command:
+
+::
+
+    $ pip install 'myscaledb-client[httpx]'
+
+
+Or `myscaledb-client[httpx-speedups]` to install with extra speedups.
+
+Installing with `[*-speedups]` adds the following:
+
+- `cChardet`_ for `aiohttp` speedup
+- `aiodns`_ for `aiohttp` speedup
+- `ciso8601`_ for ultra-fast datetime parsing while decoding data from ClickHouse for `aiohttp` and `httpx`.
+
+.. _cChardet: https://pypi.python.org/pypi/cchardet
+.. _aiodns: https://pypi.python.org/pypi/aiodns
+.. _ciso8601: https://github.com/closeio/ciso8601
+
+
 
 Quick Start
 -----------
