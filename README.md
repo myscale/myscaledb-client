@@ -9,27 +9,28 @@ and a fully typed interface.
 
 ## Table of Contents
 
-- [Installation](#installation)
-- [Quick Start](#quick-start)
-- [Documentation](#documentation)
+- [MyScale Database Client](#myscale-database-client)
+  - [Table of Contents](#table-of-contents)
+  - [Installation](#installation)
+  - [Quick Start](#quick-start)
+    - [Connecting to MyScale](#connecting-to-myscale)
+    - [Querying the database](#querying-the-database)
+  - [Documentation](#documentation)
 
 ## Installation
 
-You can use `myscaledb-client` with either
-[aiohttp](https://github.com/aio-libs/aiohttp) or
-[httpx](https://github.com/encode/httpx) http connectors.
-
 We recommend you to install it with command:
+
 ```bash
-> pip install myscaledb-client
+pip install myscaledb-client
 ```
 
 ## Quick Start
 
-### Connecting to ClickHouse
+### Connecting to MyScale
 
 The quickest way to get up and running with `myscaledb-client` is to simply connect
-and check ClickHouse is alive.
+and check MyScale is alive.
 
 ```python
 # This is a demo using Client.
@@ -40,7 +41,7 @@ from myscaledb import Client
 def main():
     client = Client(url='http://localhost:8123')
     alive = client.is_alive()
-    print(f"Is ClickHouse alive? -> {alive}")
+    print(f"Is MyScale alive? -> {alive}")
 
 if __name__ == '__main__':
     main()
@@ -48,20 +49,27 @@ if __name__ == '__main__':
 
 ### Querying the database
 
+Create a table with 4 dimensional vectors:
+
 ```python
-# Create a table with 4 dimensional vectors.
 client.execute(
-"CREATE TABLE default.test \
-( \
-    id UInt64, \
-    name String, \
-    vector FixedArray(Float32, 4) \
-) \
-ENGINE = MergeTree ORDER BY id")
-# View all tables in current database.
+    """CREATE TABLE default.test
+    (
+        id UInt64,
+        name String,
+        vector FixedArray(Float32, 4)
+    )
+    ENGINE = MergeTree ORDER BY id"""
+)
+```
+
+View all tables in current database:
+
+```python
 res = client.fetch(query="show tables")
 print([row[0] for row in res])
 ```
 
 ## Documentation
-To check out the [api docs](https://myscaledb-client.readthedocs.io/en/latest/introduction.html), visit the [readthedocs site](https://myscaledb-client.readthedocs.io/en/latest/introduction.html)
+
+To check out the [api docs](https://myscaledb-client.readthedocs.io/en/latest/introduction.html), visit the [readthedocs site](https://myscaledb-client.readthedocs.io/en/latest/introduction.html).

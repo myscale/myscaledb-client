@@ -10,31 +10,33 @@ and a fully typed interface.
 MyScale is a vector database built on the top of ClickHouse. We forked and
 modified `aiochclient`_ to support vector related queries, and also add a
 synchronous client. Since MyScale is compatible with ClickHouse,
-`myscaledb-client` can be also used as a ClickHouse client.
+``myscaledb-client`` can be also used as a ClickHouse client.
 
 .. _aiochclient: https://github.com/maximdanilchenko/aiochclient/
 
-Use `myscaledb-client` for a simple interface into your MyScale/ClickHouse
+Use ``myscaledb-client`` for a simple interface into your MyScale
 deployment.
 
 Requirements
 ------------
 
-`myscaledb-client` works on Linux, OSX, and Windows.
+``myscaledb-client`` works on Linux, OSX, and Windows.
 
 It requires Python >= 3.6 due to the use of types.
 
 Installation
 ------------
 
-You can install `myscaledb-client` with `pip` or your favourite package manager, We recommend you to install it with command:
+You can install ``myscaledb-client`` with ``pip`` or your favourite package manager.
+We recommend you to install it with command:
 
 ::
 
     $ pip install myscaledb-client
 
 
-Add the ``-U`` switch to update to the latest version if `myscaledb-client` is already installed.
+Add the ``-U`` switch to update to the latest version if ``myscaledb-client`` is
+already installed.
 
 To use with `aiohttp` install it with command:
 
@@ -42,23 +44,24 @@ To use with `aiohttp` install it with command:
 
     $ pip install 'myscaledb-client[aiohttp]'
 
+Or ``myscaledb-client[aiohttp-speedups]`` to install with extra speedups.
+By default, ``aiohttp`` is included if not specified.
 
-Or `myscaledb-client[aiohttp-speedups]` to install with extra speedups.
-
-To use with `httpx` install it with command:
+To use with ``httpx`` install it with command:
 
 ::
 
     $ pip install 'myscaledb-client[httpx]'
 
 
-Or `myscaledb-client[httpx-speedups]` to install with extra speedups.
+Or ``myscaledb-client[httpx-speedups]`` to install with extra speedups.
 
-Installing with `[*-speedups]` adds the following:
+Installing with ``[*-speedups]`` adds the following:
 
-- `cChardet`_ for `aiohttp` speedup
-- `aiodns`_ for `aiohttp` speedup
-- `ciso8601`_ for ultra-fast datetime parsing while decoding data from ClickHouse for `aiohttp` and `httpx`.
+* `cChardet`_ for ``aiohttp`` speedup
+* `aiodns`_ for ``aiohttp`` speedup
+* `ciso8601`_ for ultra-fast datetime parsing while
+  decoding data from MyScale for ``aiohttp`` and ``httpx``.
 
 .. _cChardet: https://pypi.python.org/pypi/cchardet
 .. _aiodns: https://pypi.python.org/pypi/aiodns
@@ -69,8 +72,8 @@ Installing with `[*-speedups]` adds the following:
 Quick Start
 -----------
 
-The quickest way to get up and running with `myscaledb-client` is to simply connect
-and check ClickHouse is alive. Here's how you would do that:
+The quickest way to get up and running with ``myscaledb-client`` is to simply connect
+and check MyScale is alive. Here's how you would do that:
 
 ::
 
@@ -85,7 +88,7 @@ and check ClickHouse is alive. Here's how you would do that:
         async with ClientSession() as s:
             async with AsyncClient(s) as client:
                 alive = await client.is_alive()
-                print(f"Is ClickHouse alive? -> {alive}")
+                print(f"Is MyScale alive? -> {alive}")
 
     if __name__ == '__main__':
         asyncio.run(main())
@@ -100,12 +103,12 @@ and check ClickHouse is alive. Here's how you would do that:
     def main():
         client = Client()
         alive = client.is_alive()
-        print(f"Is ClickHouse alive? -> {alive}")
+        print(f"Is MyScale alive? -> {alive}")
 
     if __name__ == '__main__':
         main()
 
-This automatically queries a instance of ClickHouse on `localhost:8123` with the
+This automatically queries a instance of MyScale on ``localhost:8123`` with the
 default user. You may want to set up a different connection to test. To do that,
 change the following line::
 
@@ -115,5 +118,5 @@ To something like::
 
     client = Client(url='http://localhost:8123')
 
-You can find more sample code to operate ClickHouse in the :ref:`reference`.
-Continue reading to learn more about `myscaledb-client`.
+You can find more sample code to operate MyScale in the :ref:`reference`.
+Continue reading to learn more about ``myscaledb-client``.
