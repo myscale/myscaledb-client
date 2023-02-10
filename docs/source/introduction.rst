@@ -119,7 +119,7 @@ To something like::
     client = Client(url='http://localhost:8123')
 
 Type Conversion
------------
+---------------
 
 ``myscaledb-client`` automatically converts types from MyScale to python types and
 vice-versa.
@@ -161,7 +161,7 @@ Map(T1, T2)           Dict[T1, T2]
 
 
 Connection Pool Settings
------------
+------------------------
 
 ``myscaledb-client`` uses the `aiohttp.TCPConnector`_ to determine pool size.  By default, the pool limit is 100 open connections.
 
