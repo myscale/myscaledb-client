@@ -154,7 +154,6 @@ UUID                  uuid.UUID
 Nothing               None
 Tuple(T1, T2, ...)    Tuple[T1, T2, ...]
 Array(T)              List[T]
-FixedArray(T)         List[T]
 Nullable(T)           None or T
 LowCardinality(T)     T
 Map(T1, T2)           Dict[T1, T2]
