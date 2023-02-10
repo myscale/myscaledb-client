@@ -14,7 +14,7 @@ source_suffix = ".rst"
 master_doc = "index"
 pygments_style = "default"
 html_theme = "sphinx_rtd_theme"
-html_static_path = ["_static"]
+html_static_path = []
 
 html_theme_options = {
     "description": (

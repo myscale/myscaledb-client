@@ -118,5 +118,55 @@ To something like::
 
     client = Client(url='http://localhost:8123')
 
+Type Conversion
+-----------
+
+``myscaledb-client`` automatically converts types from MyScale to python types and
+vice-versa.
+
+==================   =================
+MyScale Type         Python Type
+==================   =================
+UInt8                 int
+UInt16                int
+UInt32                int
+UInt64                int
+Int8                  int
+Int16                 int
+Int32                 int
+Int64                 int
+Float32               float
+Float64               float
+String                str
+FixedString           str
+Enum8                 str
+Enum16                str
+Date                  datetime.date
+DateTime              datetime.date
+DateTime64            datetime.date
+Decimal               decimal.Decimal
+Decimal32             decimal.Decimal
+Decimal64             decimal.Decimal
+Decimal128            decimal.Decimal
+IPv4                  ipaddress.IPv4Address
+IPv6                  ipaddress.IPv6Address
+UUID                  uuid.UUID
+Nothing               None
+Tuple(T1, T2, ...)    Tuple[T1, T2, ...]
+Array(T)              List[T]
+FixedArray(T)         List[T]
+Nullable(T)           None or T
+LowCardinality(T)     T
+Map(T1, T2)           Dict[T1, T2]
+==================   =================
+
+
+Connection Pool Settings
+-----------
+
+``myscaledb-client`` uses the `aiohttp.TCPConnector`_ to determine pool size.  By default, the pool limit is 100 open connections.
+
+.. _aiohttp.TCPConnector: https://docs.aiohttp.org/en/stable/client_advanced.html#limiting-connection-pool-size
+
 You can find more sample code to operate MyScale in the :ref:`reference`.
 Continue reading to learn more about ``myscaledb-client``.
