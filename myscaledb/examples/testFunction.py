@@ -13,25 +13,25 @@ async def async_client_test():
             alive = await client.is_alive()
             print(f"Is ClickHouse alive? -> {alive}")
             res = await client.fetch(query=single_search_query)
-            for line in res:
-                print(f"{line[0]}---{line[1]}")
+            for record in res:
+                print("\t".join(map(str, record.values())))
 
 async def async_client_test2():
     async with AsyncClient(url="http://10.10.1.51:8123/") as client:
         alive = await client.is_alive()
         print(f"Is ClickHouse alive? -> {alive}")
-        async for line in client.iterate(query=single_search_query):
-            print(f"{line[0]}---{line[1]}")
+        async for record in client.iterate(query=single_search_query):
+            print("\t".join(map(str, record.values())))
 
 
 def sync_client_test():
     sync_client = Client(url='http://10.10.1.51:8123/', user="default", password="")
     print(f"Is -- ClickHouse alive? -> {sync_client.is_alive()}")
-    for i in sync_client.iterate(query=single_search_query):
-        print(f"{i[0]}---{i[1]}")
+    for record in sync_client.iterate(query=single_search_query):
+        print("\t".join(map(str, record.values())))
     print("------")
-    row=sync_client.fetchrow(query=single_search_query)
-    print(f"{row[0]} {row[1]}")
+    record=sync_client.fetchrow(query=single_search_query)
+    print("\t".join(map(str, record.values())))
 
 def upload_data():
     sync_client = Client(url='http://10.10.1.51:8123/', user="default", password="")

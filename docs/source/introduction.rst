@@ -3,7 +3,7 @@
 Introduction
 ============
 
-`myscaledb-client` is an async/sync http(s) MyScale client for python 3.6+ supporting
+``myscaledb-client`` is an async/sync http(s) MyScale client for python 3.6+ supporting
 type conversion in both directions, streaming, lazy decoding on select queries,
 and a fully typed interface.
 
@@ -78,7 +78,7 @@ and check MyScale is alive. Here's how you would do that:
 ::
 
     # This is a demo using AsyncClient.
-    # AsyncClient can give you a higher degree of concurrency, it requires an understanding of asynchronous programming.
+    # AsyncClient can give you a higher degree of concurrency, it requires an understanding of asynchronous programming and provides higher performance.
 
     import asyncio
     from myscaledb import AsyncClient
@@ -89,6 +89,9 @@ and check MyScale is alive. Here's how you would do that:
             async with AsyncClient(s) as client:
                 alive = await client.is_alive()
                 print(f"Is MyScale alive? -> {alive}")
+                res = await client.fetch(query="select now()")
+                for record in res:
+                    print(f"{record[0]}")
 
     if __name__ == '__main__':
         asyncio.run(main())
@@ -96,7 +99,7 @@ and check MyScale is alive. Here's how you would do that:
 ::
 
     # This is a demo using Client.
-    # Client works in sync mode, in line with most people's programming habits.
+    # Client works in sync mode and is simple to use.
 
     from myscaledb import Client
 
@@ -104,6 +107,9 @@ and check MyScale is alive. Here's how you would do that:
         client = Client()
         alive = client.is_alive()
         print(f"Is MyScale alive? -> {alive}")
+        res = client.fetch(query="select now()")
+        for record in res:
+            print(f"{record[0]}")
 
     if __name__ == '__main__':
         main()
