@@ -242,8 +242,8 @@ class AsyncClient(BaseClient):
                    alive = await client.is_alive()
                    print(f"Is MyScale alive? -> {alive}")
                    res = await client.fetch(query="select id,name from default.test_table")
-                   for line in res:
-                       print(f"{line[0]}---{line[1]}")
+                   for record in res:
+                       print(f"{record[0]}\t{record[1]}")
 
            if __name__ == '__main__':
                asyncio.run(main())
@@ -316,10 +316,6 @@ class AsyncClient(BaseClient):
                 "INSERT INTO t VALUES",
                 (1, (dt.date(2018, 9, 7), None)),
                 (2, (dt.date(2018, 9, 8), 3.14)),
-            )
-            await client.execute(
-                "SELECT * FROM t WHERE a={u8}",
-                params={"u8": 12}
             )
 
         :return: Nothing.

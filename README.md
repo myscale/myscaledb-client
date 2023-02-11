@@ -34,7 +34,7 @@ and check MyScale is alive.
 
 ```python
 # This is a demo using Client.
-# Client works in sync mode, in line with most people's programming habits.
+# Client works in sync mode and is simple to use.
 
 from myscaledb import Client
 
@@ -72,4 +72,4 @@ print([row[0] for row in res])
 
 ## Documentation
 
-To check out the [api docs](https://myscaledb-client.readthedocs.io/en/latest/introduction.html), visit the [readthedocs site](https://myscaledb-client.readthedocs.io/en/latest/introduction.html).
+To check out the [API docs](https://myscaledb-client.readthedocs.io/en/latest/introduction.html), visit the [readthedocs site](https://myscaledb-client.readthedocs.io/en/latest/introduction.html).

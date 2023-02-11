@@ -160,10 +160,6 @@ class Client(AsyncChClient):
                 (1, (dt.date(2018, 9, 7), None)),
                 (2, (dt.date(2018, 9, 8), 3.14)),
             )
-            client.execute(
-                "SELECT * FROM t WHERE a={u8}",
-                params={"u8": 12}
-            )
 
         :return: Nothing.
         """
