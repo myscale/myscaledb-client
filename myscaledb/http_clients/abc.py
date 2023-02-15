@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from typing import Any, AsyncGenerator
-# import aiohttp,httpx
 from myscaledb.common.exceptions import ClientError
 
 
@@ -43,4 +42,4 @@ class HttpClientABC(ABC):
                 return HttpxHttpClient
         except ImportError:
             pass
-        raise ClientError('Async http client heeded. Please install aiohttp or httpx')
+        raise ClientError('You may not have installed aiohttp/httpx, or you may have used the wrong parameters when creating the client.')

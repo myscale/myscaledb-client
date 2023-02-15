@@ -1,3 +1,4 @@
+import asyncio
 import json as json_
 import sys
 import logging
@@ -281,6 +282,14 @@ class AsyncClient(BaseClient):
             exc_tb: Optional[TracebackType],
     ) -> None:
         await self.close()
+
+    def __del__(self):
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+        loop.run_until_complete(self.close())
 
     async def close(self) -> None:
         """Close the session"""
