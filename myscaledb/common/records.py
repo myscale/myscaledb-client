@@ -71,6 +71,11 @@ class Record(Mapping):
     def __len__(self) -> int:
         return len(self._names)
 
+    def __repr__(self):
+        self._decode()
+        self._decoded = True
+        return str(self._row)
+
     def _decode(self):
         if self._decoded:
             return None
