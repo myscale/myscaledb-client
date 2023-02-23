@@ -1,0 +1,127 @@
+stages:
+  - build
+  - pytest
+  - function_test
+
+build_package:
+  stage: build
+  image: harbor.internal.moqi.ai/mqdb/python-sdk-test:latest
+  script:
+    - python3 -m build
+  artifacts:
+    name: "dist"
+    expire_in: 2 week
+    paths:
+      - dist
+
+fetch_test:
+  stage: pytest
+  needs:
+    - job: build_package
+      artifacts: true
+  artifacts:
+    name: "dist"
+    paths:
+      - dist
+    when: always
+  image: harbor.internal.moqi.ai/mqdb/python-sdk-test:latest
+  script:
+    - ls -lt
+    - pip install $(ls dist/*.tar.gz)
+    - cd ci
+    - bash run.sh
+    - cd ../demo
+    - pytest ci_pytest_fetch.py
+
+
+json_test:
+  stage: pytest
+  needs:
+    - job: build_package
+      artifacts: true
+  artifacts:
+    name: "dist"
+    paths:
+      - dist
+    when: always
+  image: harbor.internal.moqi.ai/mqdb/python-sdk-test:latest
+  script:
+    - pip install $(ls dist/*.tar.gz)
+    - cd ci
+    - bash run.sh
+    - cd ../demo
+    - pytest ci_pytest_json.py
+
+records_test:
+  stage: pytest
+  needs:
+    - job: build_package
+      artifacts: true
+  artifacts:
+    name: "dist"
+    paths:
+      - dist
+    when: always
+  image: harbor.internal.moqi.ai/mqdb/python-sdk-test:latest
+  script:
+    - pip install $(ls dist/*.tar.gz)
+    - cd ci
+    - bash run.sh
+    - cd ../demo
+    - pytest ci_pytest_records.py
+
+types_test:
+  stage: pytest
+  needs:
+    - job: build_package
+      artifacts: true
+  artifacts:
+    name: "dist"
+    paths:
+      - dist
+    when: always
+  image: harbor.internal.moqi.ai/mqdb/python-sdk-test:latest
+  script:
+    - pip install $(ls dist/*.tar.gz)
+    - cd ci
+    - bash run.sh
+    - cd ../demo
+    - pytest ci_pytest_types.py
+
+upload:
+  stage: function_test
+  needs:
+    - job: build_package
+      artifacts: true
+  artifacts:
+    name: "dist"
+    paths:
+      - dist
+    when: always
+  image: harbor.internal.moqi.ai/mqdb/python-sdk-test:latest
+  script:
+    - pip install $(ls dist/*.tar.gz)
+    - cd ci
+    - bash run.sh
+    - cd ../demo
+    - python3 ci_upload.py
+
+vector_search:
+  stage: function_test
+  needs:
+    - job: build_package
+      artifacts: true
+  artifacts:
+    name: "dist"
+    paths:
+      - dist
+    when: always
+  image: harbor.internal.moqi.ai/mqdb/python-sdk-test:latest
+  script:
+    - pip install $(ls dist/*.tar.gz)
+    - cd ci
+    - bash run.sh
+    - cd ../demo
+    - python3 ci_vector_search.py
+
+

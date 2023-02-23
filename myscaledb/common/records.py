@@ -1,3 +1,4 @@
+import logging
 from collections.abc import Mapping
 from typing import Any, Callable, Dict, Iterator, List, Tuple, Union
 
@@ -6,6 +7,9 @@ try:
     from myscaledb.common._types import what_py_converter, empty_convertor
 except ImportError:
     from myscaledb.common.types import what_py_converter, empty_convertor
+
+logger = logging.getLogger(__name__)
+logging.getLogger(__name__).setLevel(logging.WARNING)
 
 __all__ = ["RecordsFabric", "Record", "FromJsonFabric"]
 
@@ -80,6 +84,7 @@ class Record(Mapping):
         if self._decoded:
             return None
         self._row = tuple(
+            # converter is custom python objects(_types.pyx), it'll help us parse the data sent back from the database
             converter(val)
             for converter, val in zip(self._converters, self._row.split(b"\t"))
         )
@@ -102,6 +107,7 @@ class RecordsFabric:
             ]
 
     def new(self, row: bytes) -> Record:
+        # each row is select value from MyScale
         return Record(
             row=row[:-1],  # because of delimiter
             names=self.names,

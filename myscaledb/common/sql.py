@@ -1,8 +1,12 @@
+import logging
 import re
 
 import sqlparse.keywords
 from sqlparse import tokens
 from sqlparse.keywords import KEYWORDS_COMMON
+
+logger = logging.getLogger(__name__)
+logging.getLogger(__name__).setLevel(logging.WARNING)
 
 
 class Where(sqlparse.sql.TokenList):
