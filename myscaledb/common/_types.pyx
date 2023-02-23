@@ -1,5 +1,7 @@
 #cython: language_level=3
+import json
 import re
+import ast
 from decimal import Decimal
 from ipaddress import IPv4Address, IPv6Address
 from uuid import UUID
@@ -48,7 +50,7 @@ RE_ARRAY = re.compile(r"^Array\((.*)\)$")
 RE_FixedARRAY = re.compile(r"^FixedArray\((.*)\)$")
 RE_NULLABLE = re.compile(r"^Nullable\((.*)\)$")
 RE_LOW_CARDINALITY = re.compile(r"^LowCardinality\((.*)\)$")
-
+RE_MAP = re.compile(f"^Map\((.*)\)$")
 
 cdef str decode(char* val):
     """
@@ -455,6 +457,8 @@ cdef class ArrayType:
             self.type = what_py_type(RE_FixedARRAY.findall(name)[0].split(',')[0], container=True)
 
     cdef list _convert(self, str string):
+        # if not isinstance(string, str):
+        #     string = str(string)
         return [self.type.p_type(val) for val in seq_parser(string[1:-1])]
 
     cpdef list p_type(self, str string):
@@ -603,6 +607,33 @@ cdef class DecimalType:
     cpdef object convert(self, bytes value):
         return Decimal(value.decode())
 
+cdef class MapType:
+    cdef:
+        str name
+        dict string_to_dict
+        bint container
+        key_type
+        value_type
+
+    def __cinit__(self, str name, bint container):
+        self.name = name
+        self.container = container
+        # ps. Map(String, UInt64), RE_MAP findall() return ['String, UInt64']
+        key_comma_value=RE_MAP.findall(name)[0]
+        self.key_type = what_py_type(key_comma_value[:key_comma_value.index(',')], container=True)
+        self.value_type = what_py_type(key_comma_value[key_comma_value.index(',')+1:], container=True)
+
+    cdef dict _convert(self, str string):
+        if isinstance(string, str):
+            string_to_dict = ast.literal_eval(string)
+        return {self.key_type.p_type(str(key)): self.value_type.p_type(str(val)) for key, val in string_to_dict.items()}
+
+    cpdef dict p_type(self, str string):
+        return self._convert(string)
+
+    cpdef dict convert(self, bytes value):
+        return self._convert(decode(value))
+
 
 cdef dict CH_TYPES_MAPPING = {
     "Bool": BoolType,
@@ -636,6 +667,7 @@ cdef dict CH_TYPES_MAPPING = {
     "Decimal128": DecimalType,
     "IPv4": IPv4Type,
     "IPv6": IPv6Type,
+    "Map": MapType
 }
 
 
@@ -701,6 +733,8 @@ cdef bytes unconvert_tuple(tuple value):
 cdef bytes unconvert_array(list value):
     return b"[" + b",".join(py2ch(elem) for elem in value) + b"]"
 
+cdef bytes unconvert_dict(dict value):
+    return str(value).encode()
 
 cdef bytes unconvert_nullable(object value):
     return b"NULL"
@@ -727,6 +761,7 @@ cdef dict PY_TYPES_MAPPING = {
     datetime: unconvert_datetime,
     tuple: unconvert_tuple,
     list: unconvert_array,
+    dict: unconvert_dict,
     type(None): unconvert_nullable,
     UUID: unconvert_uuid,
     Decimal: unconvert_decimal,
@@ -742,7 +777,7 @@ cpdef bytes py2ch(value):
         raise ClientError(
             f"Unrecognized type: '{type(value)}'. "
             f"The value type should be exactly one of "
-            f"int, float, str, dt.date, dt.datetime, tuple, list, uuid.UUID (or None). "
+            f"int, float, str, dt.date, dt.datetime, dict, tuple, list, uuid.UUID (or None). "
             f"No subclasses yet."
         )
 

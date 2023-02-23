@@ -7,7 +7,8 @@ try:
     from Cython.Build import cythonize
 
     USE_CYTHON = True
-except ImportError:
+except ImportError as e:
+    print(e)
     USE_CYTHON = False
 
 ext = '.pyx' if USE_CYTHON else '.c'
@@ -50,7 +51,7 @@ def read(fname):
 
 setup_opts = dict(
     name='myscaledb-client',
-    version='2.0.4',
+    version='2.0.5',
     description='Async and sync http MyScale client for python 3.6+',
     long_description=read('README.md'),
     long_description_content_type="text/markdown",

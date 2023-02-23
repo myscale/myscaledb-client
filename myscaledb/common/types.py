@@ -1,4 +1,6 @@
+import ast
 import datetime as dt
+import logging
 import re
 from abc import ABC, abstractmethod
 from decimal import Decimal
@@ -7,6 +9,9 @@ from typing import Any, Callable, Generator, Optional
 from uuid import UUID
 
 from myscaledb.common.exceptions import ClientError
+
+logger = logging.getLogger(__name__)
+logging.getLogger(__name__).setLevel(logging.WARNING)
 
 try:
     import ciso8601
@@ -17,25 +22,25 @@ except ImportError:
     def date_parse(string):
         return dt.datetime.strptime(string, '%Y-%m-%d')
 
+
     def datetime_parse(string):
         return dt.datetime.strptime(string, '%Y-%m-%d %H:%M:%S')
+
 
     def datetime_parse_f(string):
         return dt.datetime.strptime(string, '%Y-%m-%d %H:%M:%S.%f')
 
-
-__all__ = ["what_py_converter", "rows2ch", "list2ch", "json2ch", "py2ch", "empty_convertor"]
-
+__all__ = ["what_py_converter", "rows2ch", "json2ch", "py2ch", "empty_convertor"]
 
 RE_TUPLE = re.compile(r"^Tuple\((.*)\)$")
 RE_ARRAY = re.compile(r"^Array\((.*)\)$")
 RE_FixedARRAY = re.compile(r"^FixedArray\((.*)\)$")
 RE_NULLABLE = re.compile(r"^Nullable\((.*)\)$")
 RE_LOW_CARDINALITY = re.compile(r"^LowCardinality\((.*)\)$")
+RE_MAP = re.compile(r"^Map\((.*)\)$")
 
 
 class BaseType(ABC):
-
     __slots__ = ("name", "container")
 
     ESC_CHR_MAPPING = {
@@ -271,7 +276,6 @@ class IPv6Type(BaseType):
 
 
 class TupleType(BaseType):
-
     __slots__ = ("name", "types")
 
     def __init__(self, name: str, **kwargs):
@@ -289,14 +293,16 @@ class TupleType(BaseType):
 
     @staticmethod
     def unconvert(value) -> bytes:
+        # Here unconvert can parse tuples or lists
         return b"(" + b",".join(py2ch(elem) for elem in value) + b")"
 
 
 class ArrayType(BaseType):
-
     __slots__ = ("name", "type")
 
+    # self.type refers to [the type of the element in the array]
     def __init__(self, name: str, **kwargs):
+        # name: ps Array(Float32)
         super().__init__(name, **kwargs)
         if len(RE_ARRAY.findall(name)) != 0:
             self.type = what_py_type(RE_ARRAY.findall(name)[0], container=True)
@@ -306,6 +312,9 @@ class ArrayType(BaseType):
             )
 
     def p_type(self, string: str) -> list:
+        if not isinstance(string, str):
+            # avoid seq_parser parsing error, you should verify string's type
+            string = str(string)
         return [self.type.p_type(val) for val in self.seq_parser(string[1:-1])]
 
     @staticmethod
@@ -313,8 +322,34 @@ class ArrayType(BaseType):
         return b"[" + b",".join(py2ch(elem) for elem in value) + b"]"
 
 
-class NullableType(BaseType):
+class MapType(BaseType):
+    __slots__ = ("name", "key_type", "value_type")
 
+    def __init__(self, name: str, **kwargs):
+        super().__init__(name, **kwargs)
+        tps = RE_MAP.findall(name)[0]
+        comma_index = tps.index(",")
+        self.key_type = what_py_type(tps[:comma_index], container=True)
+        self.value_type = what_py_type(tps[comma_index + 1:], container=True)
+
+    def p_type(self, string: Any) -> dict:
+        if isinstance(string, str):
+            # convert string to python dict
+            # string ps: {'first_key':{101:[1,2,3],102:[4,5,6],103:[7,8,9]},'second_key':{201:[2,3],202:[5,6],203:[9]}}
+            string = ast.literal_eval(string)
+        return {
+            # use key_type convert key, use value_type convert value
+            self.key_type.p_type(key): self.value_type.p_type(val)
+            for key, val in string.items()
+        }
+
+    @staticmethod
+    def unconvert(value) -> bytes:
+        # support python dict to clickhouse map type
+        return str(value).encode()
+
+
+class NullableType(BaseType):
     __slots__ = ("name", "type")
     NULLABLE = {r"\N", "NULL"}
 
@@ -341,7 +376,6 @@ class NothingType(BaseType):
 
 
 class LowCardinalityType(BaseType):
-
     __slots__ = ("name", "type")
 
     def __init__(self, name: str, container: bool = False, **kwargs):
@@ -386,6 +420,7 @@ CH_TYPES_MAPPING = {
     "DateTime64": DateTime64Type,
     "Tuple": TupleType,
     "Array": ArrayType,
+    "Map": MapType,
     "FixedArray": ArrayType,
     "Nullable": NullableType,
     "Nothing": NothingType,
@@ -407,6 +442,7 @@ PY_TYPES_MAPPING = {
     dt.date: DateType.unconvert,
     dt.datetime: DateTimeType.unconvert,
     tuple: TupleType.unconvert,
+    dict: MapType.unconvert,
     list: ArrayType.unconvert,
     type(None): NullableType.unconvert,
     UUID: UUIDType.unconvert,
@@ -421,7 +457,7 @@ def what_py_type(name: str, container: bool = False) -> BaseType:
     name = name.strip()
     try:
         if name.startswith('SimpleAggregateFunction') or name.startswith(
-            'AggregateFunction'
+                'AggregateFunction'
         ):
             ch_type = re.findall(r',(.*)\)', name)[0].strip()
         else:
@@ -443,16 +479,12 @@ def py2ch(value):
         raise ClientError(
             f"Unrecognized type: '{type(value)}'. "
             f"The value type should be exactly one of "
-            f"int, float, str, dt.date, dt.datetime, tuple, list, uuid.UUID (or None). "
+            f"int, float, str, dt.date, dt.datetime, dict, tuple, list, uuid.UUID (or None). "
             f"No subclasses yet."
         )
 
 
 def rows2ch(*rows):
-    return b",".join(TupleType.unconvert(row) for row in rows)
-
-
-def list2ch(rows):
     return b",".join(TupleType.unconvert(row) for row in rows)
 
 

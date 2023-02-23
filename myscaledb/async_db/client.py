@@ -14,12 +14,12 @@ from myscaledb.common.sql import sqlparse
 
 # Optional cython extension:
 try:
-    from myscaledb.common._types import rows2ch, json2ch, py2ch, list2ch
+    from myscaledb.common._types import rows2ch, json2ch, py2ch
 except ImportError:
-    from myscaledb.common.types import rows2ch, json2ch, py2ch, list2ch
+    from myscaledb.common.types import rows2ch, json2ch, py2ch
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(stream=sys.stdout, level=logging.ERROR)
+logging.getLogger(__name__).setLevel(logging.WARNING)
 
 
 class QueryTypes(Enum):
@@ -97,7 +97,9 @@ class BaseClient:
     def _parse_squery(query):
         statement = sqlparse.parse(query)[0]
         statement_type = statement.get_type()
-        if statement_type in ('SELECT', 'SHOW', 'DESCRIBE', 'EXISTS'):
+        if statement_type == "UNKNOWN" and str(statement)[:7].upper() == 'EXPLAIN':
+            statement_type = 'EXPLAIN'
+        if statement_type in ('SELECT', 'SHOW', 'DESCRIBE', 'EXISTS', 'EXPLAIN'):
             need_fetch = True
         else:
             need_fetch = False
@@ -163,8 +165,10 @@ class BaseClient:
                         "only one argument is accepted in file read mode"
                     )
                 data = []
-            elif isinstance(args[0], list):
-                data = list2ch(args[0])
+            elif isinstance(args[0], list) and len(args) == 1 \
+                    and (isinstance(args[0][0], list) or isinstance(args[0][0], tuple)):
+                # if args[0] is a list, args[0][0] must exist
+                data = rows2ch(*args[0])
             else:
                 data = rows2ch(*args)
         else:
@@ -214,11 +218,14 @@ class BaseClient:
                     yield rf.new(line)
             else:
                 rf = RecordsFabric(
+                    # names is MyScale columns name, such as 'id','name','vector'
                     names=await response.__anext__(),
+                    # tps is MyScale columns type, such as 'UInt32','String','Map(String,String)'
                     tps=await response.__anext__(),
                     convert=decode,
                 )
                 async for line in response:
+                    # each line is columns value, such as 'Python/3.8 aiohttp/3.8.3','{'max_query_size':'262144000'}'
                     yield rf.new(line)
         else:
             await self._http_client.post_no_return(
@@ -272,6 +279,7 @@ class AsyncClient(BaseClient):
     :param **settings:
         Any settings from https://clickhouse.yandex/docs/en/operations/settings
     """
+
     async def __aenter__(self) -> 'AsyncClient':
         return self
 
