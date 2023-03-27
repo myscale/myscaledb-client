@@ -62,6 +62,15 @@ def async_to_sync():
     return decorator
 
 
+def get_loop():
+    try:
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        logging.debug("create new event loop...")
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+    return loop
+
 class Client(AsyncChClient):
     """Client connection class.
 
@@ -165,7 +174,7 @@ class Client(AsyncChClient):
         """
         for _ in iterate_async_to_sync(self._execute(
                 query, *args, json=json, query_params=params, query_id=query_id
-        ), asyncio.get_event_loop()):
+        ), get_loop()):
             return None
 
     def fetch(
@@ -202,7 +211,7 @@ class Client(AsyncChClient):
                 query_params=params,
                 query_id=query_id,
                 decode=decode,
-            ), asyncio.get_event_loop())
+            ), get_loop())
         ]
 
     def fetchrow(
@@ -239,7 +248,7 @@ class Client(AsyncChClient):
                 query_params=params,
                 query_id=query_id,
                 decode=decode,
-        ), asyncio.get_event_loop()):
+        ), get_loop()):
             return row
         return None
 
@@ -276,7 +285,7 @@ class Client(AsyncChClient):
                 query_params=params,
                 query_id=query_id,
                 decode=decode,
-        ), asyncio.get_event_loop()):
+        ), get_loop()):
             if row:
                 return row[0]
         return None
@@ -322,5 +331,5 @@ class Client(AsyncChClient):
                 query_params=params,
                 query_id=query_id,
                 decode=decode,
-        ), asyncio.get_event_loop()):
+        ), get_loop()):
             yield row
